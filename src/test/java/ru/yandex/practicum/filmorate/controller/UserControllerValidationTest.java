@@ -47,6 +47,12 @@ class UserControllerValidationTest {
     }
 
     @Test
+    void validationTest_LoginContainsSpace_throwsException() {
+        user.setLogin("Sir ris");
+        Assertions.assertThrows(ValidationException.class, () -> userController.create(user));
+    }
+
+    @Test
     void validationTest_BirthdayInFuture_throwsException() {
         user.setBirthday(LocalDate.now().plusYears(1));
         Assertions.assertThrows(ValidationException.class, () -> userController.create(user));
