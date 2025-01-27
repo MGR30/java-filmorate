@@ -1,66 +1,57 @@
 package ru.yandex.practicum.filmorate.controller;
 
-import jakarta.validation.Valid;
+import lombok.RequiredArgsConstructor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
-import ru.yandex.practicum.filmorate.exception.NotFoundException;
-import ru.yandex.practicum.filmorate.exception.ValidationException;
 import ru.yandex.practicum.filmorate.model.Film;
-import ru.yandex.practicum.filmorate.util.Validator;
+import ru.yandex.practicum.filmorate.service.FilmService;
 
 import java.util.Collection;
-import java.util.HashMap;
-import java.util.Map;
 
 @RestController
+@RequiredArgsConstructor
 @RequestMapping("/films")
 public class FilmController {
     private static final Logger log = LoggerFactory.getLogger(FilmController.class);
-    private final Map<Long, Film> filmsStorage = new HashMap<>();
+
+    private final FilmService filmService;
 
     @GetMapping
     public Collection<Film> getAllFilms() {
-        return filmsStorage.values();
+        return filmService.getAllFilms();
     }
 
     @PostMapping
-    public Film create(@Valid @RequestBody Film film) {
-        log.info("Начало создания сущности фильма");
-        Validator.validate(film);
-        film.setId(getNextId());
-        film.setDuration(film.getDuration());
-        filmsStorage.put(film.getId(), film);
-        log.info("Созданная сущность фильма : {}", film);
-        return film;
+    @ResponseStatus(HttpStatus.CREATED)
+    public Film create(@RequestBody Film film) {
+        return filmService.create(film);
     }
 
     @PutMapping
-    public Film update(@Valid @RequestBody Film film) {
-        log.info("Начало обновления сущности фильма.");
-        if (film.getId() == null) {
-            log.error("Идентификатор должен быть указан");
-            throw new ValidationException("Идентификатор должен быть указан");
-        }
-        if (filmsStorage.containsKey(film.getId())) {
-            Film filmToUpdate = filmsStorage.get(film.getId());
-            Validator.validate(film);
-            filmToUpdate.setName(film.getName());
-            filmToUpdate.setDescription(film.getDescription());
-            filmToUpdate.setDuration(film.getDuration());
-            filmToUpdate.setReleaseDate(film.getReleaseDate());
-            return filmsStorage.put(film.getId(), filmToUpdate);
-        }
-
-        throw new NotFoundException("Фильм не найден");
+    public Film update(@RequestBody Film film) {
+        return filmService.update(film);
     }
 
-    private long getNextId() {
-        long currentMaxId = filmsStorage.keySet()
-                .stream()
-                .mapToLong(id -> id)
-                .max()
-                .orElse(0);
-        return ++currentMaxId;
+    @PutMapping("/{id}/like/{userId}")
+    public Film addLike(@PathVariable("id") Long filmId,
+                        @PathVariable("userId") Long userId) {
+        return filmService.addLike(filmId, userId);
+    }
+
+    @DeleteMapping("/{id}/like/{userId}")
+    public Film removeLike(@PathVariable("id") Long filmId,
+                           @PathVariable("userId") Long userId) {
+        return filmService.removeLike(filmId, userId);
+    }
+
+    @GetMapping("/popular")
+    public Collection<Film> getPopularFilms(@RequestParam(required = false) int count) {
+        if (count == 0) {
+            return filmService.getPopularFilms(10);
+        } else {
+            return filmService.getPopularFilms(count);
+        }
     }
 }
