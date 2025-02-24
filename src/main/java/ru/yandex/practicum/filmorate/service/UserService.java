@@ -10,8 +10,6 @@ import ru.yandex.practicum.filmorate.storage.UserStorage;
 import ru.yandex.practicum.filmorate.util.Validator;
 
 import java.util.Collection;
-import java.util.HashSet;
-import java.util.Objects;
 
 @Slf4j
 @Service
@@ -39,58 +37,47 @@ public class UserService {
             throw new ValidationException("Идентификатор должен быть указан");
         }
 
-        User userToUpdate = userStorage.findById(user.getId());
-        if (Objects.nonNull(userToUpdate)) {
-            userToUpdate.setName(user.getName());
-            userToUpdate.setLogin(user.getLogin());
-            userToUpdate.setEmail(user.getEmail());
-            userToUpdate.setBirthday(user.getBirthday());
-            return userStorage.save(userToUpdate);
-        }
+        User userToUpdate = userStorage.findById(user.getId())
+                .orElseThrow(() -> new NotFoundException("Пользователь не найден с ID: " + user.getId()));
 
-        throw new NotFoundException("Пользователь не найден");
+        userToUpdate.setName(user.getName());
+        userToUpdate.setLogin(user.getLogin());
+        userToUpdate.setEmail(user.getEmail());
+        userToUpdate.setBirthday(user.getBirthday());
+        return userStorage.update(userToUpdate);
+
     }
 
-    public User addFriend(Long userId, Long friendId) {
-        User user = userStorage.findById(userId);
+    public User addFriend(Integer userId, Integer friendId) {
         checkNonNullUser(userId);
-        user.getFriends().add(friendId);
-        User friend = userStorage.findById(friendId);
         checkNonNullUser(friendId);
-        friend.getFriends().add(userId);
-        userStorage.save(friend);
-        userStorage.save(user);
-        return user;
+        return userStorage.addFriend(userId, friendId);
     }
 
-    public User removeFriend(Long userId, Long friendId) {
-        User user = userStorage.findById(userId);
+    public boolean removeFriend(Integer userId, Integer friendId) {
         checkNonNullUser(userId);
-        user.getFriends().remove(friendId);
-        User friend = userStorage.findById(friendId);
         checkNonNullUser(friendId);
-        friend.getFriends().remove(userId);
-        userStorage.save(user);
-        userStorage.save(friend);
-        return user;
+        return userStorage.removeFriend(userId, friendId);
     }
 
-    public Collection<User> getFriends(Long userId) {
+    public Collection<User> getFriends(Integer userId) {
         checkNonNullUser(userId);
         return userStorage.getFriends(userId);
     }
 
-    public Collection<User> getCommonFriends(Long firstUserId, Long secondUserId) {
+    public Collection<User> getCommonFriends(Integer firstUserId, Integer secondUserId) {
         checkNonNullUser(firstUserId);
         checkNonNullUser(secondUserId);
-        Collection<User> friends = new HashSet<>(userStorage.getFriends(firstUserId));
-        friends.retainAll(userStorage.getFriends(secondUserId));
-        return friends;
+        return userStorage.getCommonFriends(firstUserId, secondUserId);
     }
 
-    private void checkNonNullUser(Long userId) {
-        if (Objects.isNull(userStorage.findById(userId))) {
-            throw new NotFoundException("Пользователь с таким идентификатором не найден");
-        }
+    public User confirmFriend(Integer userId, Integer friendId) {
+        return userStorage.confirmFriend(userId, friendId)
+                .orElseThrow(() -> new NotFoundException("Пользователь не найден с ID: " + userId));
+    }
+
+    private void checkNonNullUser(Integer userId) {
+        userStorage.findById(userId)
+                .orElseThrow(() -> new NotFoundException("Пользователь не найден с ID: " + userId));
     }
 }
