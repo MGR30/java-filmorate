@@ -8,6 +8,7 @@ import org.springframework.web.bind.annotation.*;
 import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.service.FilmService;
 
+import java.text.DateFormat;
 import java.util.Collection;
 
 @RestController
@@ -35,14 +36,14 @@ public class FilmController {
     }
 
     @PutMapping("/{id}/like/{userId}")
-    public Film addLike(@PathVariable("id") Long filmId,
-                        @PathVariable("userId") Long userId) {
+    public boolean addLike(@PathVariable("id") Integer filmId,
+                        @PathVariable("userId") Integer userId) {
         return filmService.addLike(filmId, userId);
     }
 
     @DeleteMapping("/{id}/like/{userId}")
-    public Film removeLike(@PathVariable("id") Long filmId,
-                           @PathVariable("userId") Long userId) {
+    public boolean removeLike(@PathVariable("id") Integer filmId,
+                           @PathVariable("userId") Integer userId) {
         return filmService.removeLike(filmId, userId);
     }
 

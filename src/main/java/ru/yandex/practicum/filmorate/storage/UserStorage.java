@@ -9,7 +9,7 @@ public interface UserStorage {
 
     User save(User user);
 
-    User findById(Long id);
+    User findById(Integer id);
 
-    Collection<User> getFriends(Long userId);
+    Collection<User> getFriends(Integer userId);
 }

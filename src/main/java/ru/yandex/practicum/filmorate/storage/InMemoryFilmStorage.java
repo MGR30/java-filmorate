@@ -4,15 +4,13 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 import ru.yandex.practicum.filmorate.model.Film;
 
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Objects;
+import java.util.*;
 
 @Slf4j
 @Component
 public class InMemoryFilmStorage implements FilmStorage {
-    private final Map<Long, Film> filmsStorage = new HashMap<>();
+    private final Map<Integer, Film> filmsStorage = new HashMap<>();
+    private final Map<Integer, Set<Integer>> filmsLikes = new HashMap<>();
 
     @Override
     public Collection<Film> getAllFilms() {
@@ -20,12 +18,13 @@ public class InMemoryFilmStorage implements FilmStorage {
     }
 
     @Override
-    public Film findFilmById(Long id) {
+    public Film findFilmById(Integer id) {
         return filmsStorage.get(id);
     }
 
     @Override
     public Film save(Film film) {
+        checkListContaining(film.getId());
         if (Objects.isNull(film.getId())) {
             film.setId(getNextId());
         }
@@ -35,25 +34,38 @@ public class InMemoryFilmStorage implements FilmStorage {
     }
 
     @Override
-    public Film addLike(Long filmId, Long userId) {
-        Film film = filmsStorage.get(filmId);
-        film.getLikes().add(userId);
+    public Film update(Film film) {
+        checkListContaining(film.getId());
+        if (Objects.isNull(film.getId())) {
+            film.setId(getNextId());
+        }
+
+        filmsStorage.put(film.getId(), film);
         return film;
     }
 
     @Override
-    public Film removeLike(Long filmId, Long userId) {
-        Film film = filmsStorage.get(filmId);
-        film.getLikes().remove(userId);
-        return film;
+    public boolean addLike(Integer filmId, Integer userId) {
+        return filmsLikes.get(filmId).add(userId);
     }
 
-    private long getNextId() {
-        long currentMaxId = filmsStorage.keySet()
+    @Override
+    public boolean removeLike(Integer filmId, Integer userId) {
+        return filmsLikes.get(filmId).remove(userId);
+    }
+
+    private int getNextId() {
+        int currentMaxId = filmsStorage.keySet()
                 .stream()
-                .mapToLong(id -> id)
+                .mapToInt(id -> id)
                 .max()
                 .orElse(0);
         return ++currentMaxId;
+    }
+
+    private void checkListContaining(Integer id) {
+        if (!filmsLikes.containsKey(id)) {
+            filmsLikes.put(id, new HashSet<>());
+        }
     }
 }

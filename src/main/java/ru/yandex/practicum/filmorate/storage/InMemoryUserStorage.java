@@ -4,21 +4,19 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 import ru.yandex.practicum.filmorate.model.User;
 
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Objects;
+import java.util.*;
 
 @Component
 @Slf4j
 public class InMemoryUserStorage implements UserStorage {
-    private final Map<Long, User> userStorage = new HashMap<>();
+    private final Map<Integer, User> userStorage = new HashMap<>();
 
     public Collection<User> getAll() {
         return userStorage.values();
     }
 
-    public User findById(Long id) {
+    @Override
+    public User findById(Integer id) {
         return userStorage.get(id);
     }
 
@@ -32,15 +30,16 @@ public class InMemoryUserStorage implements UserStorage {
         return user;
     }
 
-    public Collection<User> getFriends(Long userId) {
+    @Override
+    public Collection<User> getFriends(Integer userId) {
         User user = findById(userId);
         return user.getFriends().stream().map(this::findById).toList();
     }
 
-    private long getNextId() {
-        long currentMaxId = userStorage.keySet()
+    private int getNextId() {
+        int currentMaxId = userStorage.keySet()
                 .stream()
-                .mapToLong(id -> id)
+                .mapToInt(id -> id)
                 .max()
                 .orElse(0);
         return ++currentMaxId;

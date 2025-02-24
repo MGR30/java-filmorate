@@ -51,7 +51,7 @@ public class UserService {
         throw new NotFoundException("Пользователь не найден");
     }
 
-    public User addFriend(Long userId, Long friendId) {
+    public User addFriend(Integer userId, Integer friendId) {
         User user = userStorage.findById(userId);
         checkNonNullUser(userId);
         user.getFriends().add(friendId);
@@ -63,7 +63,7 @@ public class UserService {
         return user;
     }
 
-    public User removeFriend(Long userId, Long friendId) {
+    public User removeFriend(Integer userId, Integer friendId) {
         User user = userStorage.findById(userId);
         checkNonNullUser(userId);
         user.getFriends().remove(friendId);
@@ -75,12 +75,12 @@ public class UserService {
         return user;
     }
 
-    public Collection<User> getFriends(Long userId) {
+    public Collection<User> getFriends(Integer userId) {
         checkNonNullUser(userId);
         return userStorage.getFriends(userId);
     }
 
-    public Collection<User> getCommonFriends(Long firstUserId, Long secondUserId) {
+    public Collection<User> getCommonFriends(Integer firstUserId, Integer secondUserId) {
         checkNonNullUser(firstUserId);
         checkNonNullUser(secondUserId);
         Collection<User> friends = new HashSet<>(userStorage.getFriends(firstUserId));
@@ -88,7 +88,7 @@ public class UserService {
         return friends;
     }
 
-    private void checkNonNullUser(Long userId) {
+    private void checkNonNullUser(Integer userId) {
         if (Objects.isNull(userStorage.findById(userId))) {
             throw new NotFoundException("Пользователь с таким идентификатором не найден");
         }
