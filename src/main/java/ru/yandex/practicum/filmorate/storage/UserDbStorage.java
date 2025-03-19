@@ -98,7 +98,6 @@ public class UserDbStorage extends BaseRepository<User> implements UserStorage {
             throw new RuntimeException("Заявка в друзья от пользователя " + friendId + " к " + userId + " не найдена");
         }
 
-        // Проверяем, не подтверждена ли дружба уже (обратная запись)
         List<Friendship> reverseFriendship = jdbc.query(
                 checkSql,
                 new Object[]{userId, friendId},
@@ -109,11 +108,9 @@ public class UserDbStorage extends BaseRepository<User> implements UserStorage {
             throw new RuntimeException("Дружба между " + userId + " и " + friendId + " уже подтверждена");
         }
 
-        // Добавляем обратную запись для подтверждения дружбы
         String insertSql = "INSERT INTO friendships (user_id, friend_id) VALUES (?, ?)";
         jdbc.update(insertSql, userId, friendId);
 
-        // Возвращаем пользователя
         return findById(userId);
     }
 

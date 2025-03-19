@@ -28,7 +28,7 @@ public class MpaDbStorage implements MpaStorage {
         List<Mpa> mpaFromDB = jdbc.query(FIND_BY_ID_QUERY, new Object[]{id}, (rs, rowNum) -> {
             Mpa mpa = new Mpa();
             mpa.setId(rs.getInt("id"));
-            mpa.setName(rs.getString("name")); // Проверьте имя колонки!
+            mpa.setName(rs.getString("name"));
             return mpa;
         });
         System.out.println("найдено" + mpaFromDB);

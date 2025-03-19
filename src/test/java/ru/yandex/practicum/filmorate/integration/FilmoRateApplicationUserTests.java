@@ -125,27 +125,22 @@ class FilmoRateApplicationUserTests {
 
     @Test
     public void testConfirmFriend() {
-        // Проверяем исходное состояние (должна быть запись 1 -> 3)
         String checkInitialSql = "SELECT * FROM friendships WHERE user_id = 1 AND friend_id = 3";
         List<Friendship> initialFriendships = jdbc.query(checkInitialSql, new FriendshipRowMapper());
         assertThat(initialFriendships).hasSize(1);
 
-        // Вызываем confirmFriend(3, 1) - подтверждаем дружбу от 3 к 1
         Optional<User> user = userStorage.confirmFriend(3, 1);
 
-        // Проверяем, что пользователь возвращен
         assertThat(user)
                 .isPresent()
                 .hasValueSatisfying(u ->
                         assertThat(u).hasFieldOrPropertyWithValue("id", 3)
                 );
 
-        // Проверяем, что обратная запись (3 -> 1) добавлена
         String checkSql = "SELECT * FROM friendships WHERE user_id = 3 AND friend_id = 1";
         List<Friendship> friendships = jdbc.query(checkSql, new FriendshipRowMapper());
         assertThat(friendships).hasSize(1);
 
-        // Проверяем, что исходная запись (1 -> 3) осталась
         assertThat(initialFriendships).hasSize(1);
     }
 

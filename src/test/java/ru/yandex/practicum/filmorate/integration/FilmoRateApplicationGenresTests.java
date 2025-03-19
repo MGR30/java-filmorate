@@ -31,7 +31,7 @@ public class FilmoRateApplicationGenresTests {
         assertThat(genres)
                 .hasSize(6)
                 .extracting("id")
-                .containsExactly(1, 2, 3, 4, 5, 6); // Сортировка по id ASC
+                .containsExactly(1, 2, 3, 4, 5, 6);
 
         assertThat(genres)
                 .extracting("name")
