@@ -12,7 +12,7 @@ import java.util.Set;
 
 @Data
 public class User {
-    private Long id;
+    private Integer id;
     @NotBlank(message = "Электронная почта не может быть пустой")
     @Email(message = "Некорректный адрес электронной почты")
     private String email;
@@ -22,7 +22,7 @@ public class User {
     private String name;
     @PastOrPresent(message = "Дата рождения не может быть в будущем")
     private LocalDate birthday;
-    private Set<Long> friends;
+    private Set<Integer> friends;
 
     public User() {
         friends = new HashSet<>();
